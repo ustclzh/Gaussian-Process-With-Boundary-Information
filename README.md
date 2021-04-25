@@ -21,7 +21,7 @@ For example 4.1: after runing 'main.m', the result is stored by .mat file 'RESUL
 
 For example 4.2: after runing 'one_dim_boundary_inf.m', the results are stored by .tif file 'result_boundary_inf.tif' in folder named 'example4.2': 'result_boundary_inf.tif' is the figure 4;
 
-	          after runing 'one_dim_boundary_r.m', the results are stored by .tif file'result_boundary_r.tif' in folder named 'example4.2': 'result_boundary_r.tif' is the figure 5; 
+after runing 'one_dim_boundary_r.m', the results are stored by .tif file'result_boundary_r.tif' in folder named 'example4.2': 'result_boundary_r.tif' is the figure 5; 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
