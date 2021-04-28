@@ -1,7 +1,8 @@
 function [Ypred, PosCov, LCL, UCL]=BMGPPredictX_general(x,No,alphaopt,ropt,a0opt,s2,QI,QIRes,SD,n,k) 
 %checked 3
+global Temp_range Ytest
 m=size(x,1);
-a=[x(:,2)*73+27 ones(m,1)*27];
+a=[x(:,2)*Temp_range+27 ones(m,1)*27];
 Sx=x;%(x-repmat(Min,m,1))./repmat(Range,m,1)
 Dist2=zeros(m,k);
 for i=1:k        
@@ -19,6 +20,7 @@ for i=1:m
         Q2(i,j)=CompCorr(Sx(i,:),SD(j,:),ropt,No);
     end
 end
+
 w3=alphaopt*IDist2;
 w=w1+alphaopt*w2;
 Lambda=zeros(m,k+1);
@@ -31,6 +33,7 @@ Lambda(IM,Index1(IM,:))=1/M(IM);
 end
 
 miux=sum(Lambda(:,2:end).*a,2)+Lambda(:,1)*a0opt;
+%Ytest-miux
 Ypred=miux+Q2*QIRes;
 Q3=zeros(m,m);
 for i=1:m
@@ -47,12 +50,16 @@ UCL=Ypred+norminv(0.99)*RMSE;
 
 function Corr=CompCorr(x1,x2,r,No)
 if(No==0)
-    phi=r(3:4);
     r=r(1:2);
-    Corr=prod(((abs(phi.*x1).^(r))+(abs(phi.*x2).^(r))-(abs(phi.*x1-phi.*x2).^(r)))/2);
+    Corr=prod(((abs(x1).^(r))+(abs(x2).^(r))-(abs(x1-x2).^(r)))/2);
 elseif(No==1)
     Corr=prod(sinh(r.*(min(x1,x2))).*exp(-r.*(max(x1,x2))));
     
 elseif(No==2)
-    Corr=prod(min(x1,x2));
+    rho=x1-x2;
+    rho1=sqrt(6)*abs(rho)./r;
+    Corr=prod(x1)*prod(x2)*prod((exp(-rho1)).*(rho1+1));
+    %Corr=prod(x1)*prod(x2)*prod(exp(-rho1.^2));
+    %Corr=prod(x1)*prod(x2)*prod((exp(-rho1)));
+
 end

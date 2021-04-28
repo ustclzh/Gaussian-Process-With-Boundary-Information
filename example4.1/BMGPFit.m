@@ -1,13 +1,13 @@
 function [alphaopt,etaopt,ropt,a0opt,s2,unscaledsigmaD,QI,QIRes,Minout,Rangeout,SDout,nout,kout]=BMGPFit(Din,Yin,Noin)
 %checked 3
-global D Min Range SD Y n No a k Dist2 IDist2 w1 w2 Index1
+global D Min Range SD Y n No a k Dist2 IDist2 w1 w2 Index1 Temp_range 
 
 No=Noin;
 D=Din;
 Y=Yin;
 [n, d]=size(D); nout=n;
 k=2; kout=k;
-a=[D(:,2)*73+27 ones(n,1)*27];
+a=[D(:,2)*Temp_range+27 ones(n,1)*27];
 
 Min=min(D,[],1); Minout=Min;
 Range=range(D,1); Rangeout=Range;
@@ -97,9 +97,10 @@ for i=1:n
     end
 end
 RI=invandlogdet(R);
+
 sI=diag(1./unscaledsigmaD);
 QI=sI*RI*sI;
-
+%cond(invandlogdet(QI))
 w3=alphaopt*IDist2;
 w=w1+alphaopt*w2;
 Lambda=zeros(n,k+1);
@@ -138,7 +139,11 @@ elseif(No==1)
     if((sum(r<0.265285395160763)>0)||(sum(r>53.9511207457687)>0))
         Objective=Inf;
         return        
-    end      
+    end 
+%     if eta<0.5
+%         Objective=Inf;
+%         return    
+%     end
 elseif(No==2)
     r=exp(par);
     if((sum(r<0.291731110468193)>0)||(sum(r>40.7953930912641)>0))

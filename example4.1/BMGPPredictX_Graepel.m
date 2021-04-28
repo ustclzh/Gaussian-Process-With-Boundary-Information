@@ -1,6 +1,6 @@
-function [Ypred, PosCov, LCL, UCL]=BMGPPredictX(x,No,alphaopt,etaopt,ropt,a0opt,s2,unscaledsigmaD,QI,QIRes,Min,Range,SD,n,k) 
+function [Ypred, PosCov, LCL, UCL]=BMGPPredictX_Graepel(x,No,alphaopt,etaopt,ropt,a0opt,s2,unscaledsigmaD,QI,QIRes,Min,Range,SD,n,k) 
 %checked 3
-global Temp_range Ytest
+global Temp_range
 m=size(x,1);
 a=[x(:,2)*Temp_range+27 ones(m,1)*27];
 Sx=(x-repmat(Min,m,1))./repmat(Range,m,1);
@@ -30,9 +30,11 @@ M=sum(Index1,2); IM=M>1;
 if(sum(IM)>0)
 Lambda(IM,Index1(IM,:))=1/M(IM);
 end
-miux=sum(Lambda(:,2:end).*a,2)+Lambda(:,1)*a0opt; 
-%Ytest-miux
-Ypred=miux+Q2*QIRes;
+
+mu=(1-x(:,1)).*a(:,1)+(1-x(:,2)).*(a(:,2)-(1-x(:,1))*27);
+
+%miux=sum(Lambda(:,2:end).*a,2)+Lambda(:,1)*a0opt; 
+Ypred=mu+Q2*QIRes;
 if(m<=1000)
     Q3=zeros(m,m);
     for i=1:m
