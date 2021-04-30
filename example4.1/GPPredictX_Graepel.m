@@ -3,8 +3,8 @@ function [Ypred0, PosCov0, LCL0, UCL0]=GPPredictX_Graepel(x,No,ropt0,RI0,RIRes0,
 global Temp_range Ytest
 D=x;
 n=size(D,1);
-a=[D(:,2)*Temp_range+27 ones(n,1)*27];
-mu=(1-D(:,1)).*a(:,1)+(1-D(:,2)).*(a(:,2)-(1-D(:,1))*27);
+a=[D(:,2)*Temp_range+20 ones(n,1)*20];
+mu=(1-D(:,1)).*a(:,1)+(1-D(:,2)).*(a(:,2)-(1-D(:,1))*20);
 
 m=size(x,1);
 Sx=x;
@@ -49,7 +49,7 @@ elseif(No==1)
     rho=x1-x2;
     rho1=sqrt(6)*abs(rho)./r;
     Corr=prod(x1)*prod(x2)*prod((exp(-rho1)).*(rho1+1));
-    Corr=prod(x1)*prod(x2)*prod(exp(-rho1.^2));
+    %Corr=prod(x1)*prod(x2)*prod(exp(-rho1.^2));
     %Corr=prod(x1)*prod(x2)*prod((exp(-rho1)));
 elseif(No==2)
     rho=x1-x2;

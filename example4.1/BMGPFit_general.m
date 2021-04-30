@@ -5,7 +5,7 @@ D=Din;
 Y=Yin;
 [n, d]=size(D); nout=n;
 k=2; kout=k;
-a=[D(:,2)*Temp_range+27 ones(n,1)*27];
+a=[D(:,2)*Temp_range+20 ones(n,1)*20];
 Min=min(D,[],1); Minout=Min;
 Range=range(D,1); Rangeout=Range;
 SD=D; SDout=SD;
@@ -80,7 +80,7 @@ for i=1:n
     end
 end
 
-RI=invandlogdet(R+0.000001*eye(n));
+RI=invandlogdet(R);
 %sI=diag(1./unscaledsigmaD);
 QI=RI;
 
@@ -135,7 +135,7 @@ for i=1:n
     end
 end
 
-[RI, LDR]=invandlogdet(R+0.000001*eye(n));
+[RI, LDR]=invandlogdet(R);
 %sI=diag(1./unscaledsigmaD);
 QI=RI;%
 w3=alpha*IDist2;

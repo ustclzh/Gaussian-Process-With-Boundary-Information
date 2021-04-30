@@ -7,7 +7,7 @@ D=Din;
 Y=Yin;
 [n, d]=size(D); nout=n;
 k=2; kout=k;
-a=[D(:,2)*Temp_range+27 ones(n,1)*27];
+a=[D(:,2)*Temp_range+20 ones(n,1)*20];
 
 Min=min(D,[],1); Minout=Min;
 Range=range(D,1); Rangeout=Range;
@@ -29,7 +29,7 @@ Sum2=min(w2);
 startalpha0=Sum1/Sum2;
 
 bestfval=Inf;
-startalphaetacandidates=[startalpha0 0.5; startalpha0 1; startalpha0 2; startalpha0 3];
+startalphaetacandidates=[startalpha0 0.1; startalpha0 0.7; startalpha0 1; startalpha0 3];
 for j=1:4
 startalpha=startalphaetacandidates(j,1);
 starteta=startalphaetacandidates(j,2);

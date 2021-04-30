@@ -2,7 +2,7 @@ function [Ypred, PosCov, LCL, UCL]=BMGPPredictX_general(x,No,alphaopt,ropt,a0opt
 %checked 3
 global Temp_range Ytest
 m=size(x,1);
-a=[x(:,2)*Temp_range+27 ones(m,1)*27];
+a=[x(:,2)*Temp_range+20 ones(m,1)*20];
 Sx=x;%(x-repmat(Min,m,1))./repmat(Range,m,1)
 Dist2=zeros(m,k);
 for i=1:k        

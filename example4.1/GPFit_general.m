@@ -47,7 +47,7 @@ for i=1:n0
         R(j,i)=R(i,j);        
     end
 end
-RI0=invandlogdet(R+0.000001*eye(n0));
+RI0=invandlogdet(R);
 RIF=RI0*F;
 beta0=(RIF'*Y0)/(F'*RIF);
 Res=Y0;%-F*beta0;
@@ -107,7 +107,7 @@ D1=D(:,1);
 D2=D(:,2);
 n=size(D,1);
 for i=1:n
-    p=[D2(i)*Temp_range+27,27];
+    p=[D2(i)*Temp_range+20,20];
     phi=[rb(D1(i),0),rb(D2(i),0)];
     Phi=[rb(0,0),rb([D1(i),0],[0,D2(i)]);rb([D1(i),0],[0,D2(i)]),rb(0,0)];
     y(i)=phi*(Phi\p');

@@ -6,8 +6,8 @@ No0=Noin;
 D=Din;
 [n0, d]=size(D); n0out=n0;
 SD0=D;
-a=[D(:,2)*Temp_range+27 ones(n0,1)*27];
-mu=(1-D(:,1)).*a(:,1)+(1-D(:,2)).*(a(:,2)-(1-D(:,1))*27);
+a=[D(:,2)*Temp_range+20 ones(n0,1)*20];
+mu=(1-D(:,1)).*a(:,1)+(1-D(:,2)).*(a(:,2)-(1-D(:,1))*20);
 Y0=Yin-mu;
 options=optimoptions(@fminunc,'MaxIter',10^5,'TolX',10^-6,'TolFun',10^-8,'MaxFunEvals',10^5,'Display','off','Algorithm','quasi-newton');
 
@@ -101,8 +101,6 @@ elseif(No0==1)
     rho=x1-x2;
     rho1=sqrt(6)*abs(rho)./r;
     Corr=prod(x1)*prod(x2)*prod((exp(-rho1)).*(rho1+1));
-    Corr=prod(x1)*prod(x2)*prod(exp(-rho1.^2));
-    %Corr=prod(x1)*prod(x2)*prod((exp(-rho1)));
 elseif(No0==2)
     rho=x1-x2;
     rho1=2*sqrt(2.5)*abs(rho)./r;

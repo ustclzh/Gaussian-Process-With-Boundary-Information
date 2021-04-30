@@ -1,6 +1,6 @@
 function [Ypred0, PosCov0, LCL0, UCL0]=GPPredictX_general(x,No,ropt0,RI0,beta0,RIRes0,sigma20,SD0,n0,Min,Range)
 m=size(x,1);
-global  Ytest Temp_range
+global Ytest Temp_range
 ropt0=ropt0(1:2);
 Sx=x;
 R2=zeros(m,n0);
@@ -64,7 +64,7 @@ D1=D(:,1);
 D2=D(:,2);
 n=size(D,1);
 for i=1:n
-    p=[D2(i)*Temp_range+27,27];
+    p=[D2(i)*Temp_range+20,20];
     phi=[rb(D1(i),0),rb(D2(i),0)];
     Phi=[rb(0,0),rb([D1(i),0],[0,D2(i)]);rb([D1(i),0],[0,D2(i)]),rb(0,0)];
     y(i)=phi*(Phi\p');
