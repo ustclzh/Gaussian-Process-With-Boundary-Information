@@ -36,12 +36,13 @@ plot(x_test,y_p(:,2)-(norminv(0.99)*sig(:,2)).^(1/2),'r--','LineWidth',2);
 p3=plot(x,wMax,'ko','MarkerSize',12);
 p4=plot(x_test,y_t,'kx','MarkerSize',12);
 label={'Posterior mean of standard GP emulator','Posterior mean of BMGP emulator','Data','True function','LCL/UCL for standard GP emulator ','LCL/UCL for BMGP emulator '};
-legend([p1,p2,p3,p4,p5,p6],label);hold on
-ylabel('Deflection')
-xlabel('Thickness')
+legend([p1,p2,p3,p4,p5,p6],label,'FontSize',13,'Fontname', 'Times New Roman');hold on
+ylabel('Maximum Deflection','FontSize',13,'Fontname', 'Times New Roman')
+xlabel('Thickness','FontSize',13,'Fontname', 'Times New Roman')
+set(gca,'FontSize',13);
 print(gcf,'-dtiff','-r300','result_boundary_r');
-
-
+ylim([-0.6,0.38])
+%%
 function theta_gp=GP_fit(design,y,wMax_b)% all column
 %%
 global design_x y_out y_left y_right type_corr
@@ -57,7 +58,6 @@ ms=MultiStart('StartPointsToRun','all','Display','off');
 [theta_gp,fval0,exitflag0,solution0]=run(ms,problem,tpoints);
 end
 
- 
 function theta_gp=GPM_fit(design,y,wMax_b,type)% all column
 %%
 global design_x y_out type_corr bound_r
@@ -85,9 +85,6 @@ switch type
 end
 end
 
-
-
-
 function y=GP_predict(design,y,x_p,theta_gp,theta_bmgp,theta_gp0,theta_gp1,theta_gp2,wMax_b)
 theta_bmgp(2)=0;
 [y1,sig1]=predict_gp(design,x_p,y,theta_gp,wMax_b);%column
@@ -111,7 +108,6 @@ sig=(y_out-mu)'*(R\(y_out-mu))/n;
 y=n*log(sig)+log(det(R));
 end
 
-
 function y=lik_gpmr(theta)
 % likelihood with right bound
 global design_x y_out bound_r type_corr
@@ -129,8 +125,9 @@ else
 end
 n=size(design_x,1);
 R=corr_m(theta);
-sig=(y_out-bound_r)'*(R\(y_out-bound_r))/n;
-y=n*log(sig)+log(det(R));
+[invR,logdetR]=invandlogdet(R);
+sig=(y_out-bound_r)'*(invR*(y_out-bound_r))/n;
+y=n*log(sig)+logdetR;
 end
 
 function theta_bmgp=BMGP_fit(design,y,wMax_b)% all column
@@ -148,6 +145,7 @@ tpoints=CustomStartPointSet(b);
 ms=MultiStart('StartPointsToRun','all','Display','off');
 [theta_bmgp,fval1,exitflag1,solution1]=run(ms,problem,tpoints);
 end
+
 function y=lik_bmgp(theta)
 global design_x y_out wMax_r
 d=size(design_x,2);
@@ -163,8 +161,10 @@ lambda=D.^2./(D.^2+exp(alpha)./D.^2);
 lambda1=1-lambda;
 mu=(lambda'*(Q\lambda))\(lambda'*(Q\(y_out-lambda1*wMax_r)));
 sig=(y_out-mu*lambda-lambda1*wMax_r)'*(Q\(y_out-mu*lambda-lambda1*wMax_r));
-y=n*log(sig)+log(det(Q));
+[invQ,logdetQ]=invandlogdet(Q);
+y=n*log(sig)+logdetQ;
 end
+
 function y=corr_inf(theta)%specified
 global design_x
 d=size(design_x,2);
@@ -173,6 +173,7 @@ D=abs(1./abs(1+2*design_x)-1/3);
 D=D*D';
 y=D.^exp(eta).*corr_m(theta(1:d));
 end
+
 function y=corr_m(theta)
 global design_x type_corr
 design=design_x;
@@ -186,6 +187,7 @@ for i=1:n
 end
 y=R;
 end
+
 function [y,sig]=predict_gp(design,x_p,y,theta,wMax_b)%column
 global design_x y_out type_corr
 type_corr=3;
@@ -201,6 +203,7 @@ end
 sig=max(0,(1-r'*(R\r))*(y_out-mu)'*(R\(y_out-mu))/n);
 y=mu+r'*(R\(y_out-mu));
 end
+
 function [y,sig]=predict_gpm(design,x_p,y,theta,wMax_b,type)%column
 global design_x y_out type_corr
 type_corr=type;
@@ -217,6 +220,7 @@ end
 sig=((corr_custom(x_p,x_p,theta,type_corr)-r'*(R\r)))*(y_out-mu)'*(R\(y_out-mu))/n;
 y=mu+r'*(R\(y_out-mu));
 end
+
 function [y,sig]=predict_bmgp(design,x_p,y,theta,wMax_b)%column
 global design_x y_out type_corr
 type_corr=3;
@@ -230,9 +234,7 @@ r=ones(n,1);
 for i=1:n
    r(i)=corr_custom(design(i,:),x_p,theta(1:d),3);
 end
-
 D=abs(1./abs(1+2*design)-1/3);
-
 alpha =theta(d+2);
 lambda=D.^2./(D.^2+exp(alpha)./D.^2);
 lambda1=1-lambda;
@@ -245,9 +247,6 @@ end
 
 function y=corr_custom(x1,x2,r,type)
 %type: type of correlation function 
-%
-%
-%
 switch type 
     case 0
         d=size(x1,2);
@@ -261,5 +260,19 @@ switch type
     case 3
         y=exp(-abs(x1-x2)./exp(r)).*(1+abs(x1-x2)./exp(r));
 end
+end
 
+function [invR, logdetR]=invandlogdet(R)
+%checked 3
+[CR, p]=chol(R);
+if(p~=0)
+    [Eigvec, Eigval]=svd(R);
+    Eigval=diag(Eigval);
+    invR=Eigvec*diag(1./Eigval)*Eigvec';
+    logdetR=sum(log(Eigval));
+else
+    ICR=inv(CR);
+    invR=ICR*(ICR');
+    logdetR=2*sum(log(diag(CR)));
+end
 end

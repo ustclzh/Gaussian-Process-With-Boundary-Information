@@ -1,7 +1,7 @@
 clear;clc;warning off; format long
 x=[0.1,0.13,0.16,0.2,0.3,0.5]';
-%x=[0.4,0.5,0.6,0.7,0.8,0.9]';
-%x=[0.1,0.125,0.15,0.175,0.2]';
+x=[0.4,0.5,0.6,0.7,0.8,0.9]';
+x=[0.1,0.125,0.15,0.175,0.2]';
 E = 1.0e6; % modulus of elasticity
 nu = .3; % Poisson's ratio
 len = 10.0; % side length for the square plate
@@ -17,7 +17,7 @@ y_p(i,:)=res(1,:);
 sig(i,:)=res(2,:);
 y_t(i)=-0.0138*pres*len^4./(E*(x_test(i)).^3);
 end
-%
+%%
 p1=plot(x_test,y_p(:,1),'b','LineWidth',2); hold on
 p5=plot(x_test,y_p(:,1)+(norminv(0.99)*sig(:,1)).^(1/2),'b--','LineWidth',2);
 plot(x_test,y_p(:,1)-(norminv(0.99)*sig(:,1)).^(1/2),'b--','LineWidth',2)
@@ -27,10 +27,14 @@ plot(x_test,y_p(:,2)-(norminv(0.99)*sig(:,2)).^(1/2),'r--','LineWidth',2);
 p3=plot(x,wMax,'ko','MarkerSize',12);
 p4=plot(x_test,y_t,'kx','MarkerSize',12);
 label={'Posterior mean of standard GP emulator','Posterior mean of BMGP emulator','Data','True function','LCL/UCL for standard GP emulator ','LCL/UCL for BMGP emulator '};
-legend([p1,p2,p3,p4,p5,p6],label);hold on
-ylabel('Deflection')
-xlabel('Thickness')
-print(gcf,'-dtiff','-r300','result_boundary_inf');
+legend([p1,p2,p3,p4,p5,p6],label,'FontSize',13,'Fontname', 'Times New Roman');hold on
+ylabel('Maximum Deflection ','FontSize',13,'Fontname', 'Times New Roman')
+xlabel('Thickness','FontSize',13,'Fontname', 'Times New Roman')
+%xticklabels('FontSize',13)
+a=2.2;
+set(gca,'FontSize',13);
+%print(gcf,'-dtiff','-r300','result_boundary_inf');
+%ylim([-0.5,0.28])
 function [theta_gp,theta_bmgp]=GP_fit(design,y)% all column
 %%
 global design_x y_out
@@ -47,8 +51,8 @@ problem = createOptimProblem('fminunc','x0',zeros(1,3),'objective',@lik_bmgp_inf
 tpoints=CustomStartPointSet(b);
 ms=MultiStart('StartPointsToRun','all','Display','off');
 [theta_bmgp,fval1,exitflag1,solution1]=run(ms,problem,tpoints);
-
 end
+
 function y=GP_predict(design,y,x_p,theta_gp,theta_bmgp)
 global design_x y_out
 design_x=design;
@@ -67,10 +71,10 @@ end
 n=size(design_x,1);
 R=corr_m(theta);
 mu=sum(R\(y_out))/(sum(R\ones(n,1)));
-sig=(y_out-mu)'*(R\(y_out-mu))/n;
-y=n*log(sig)+log(det(R));
+[invR,logdetR]=invandlogdet(R);
+sig=(y_out-mu)'*(invR*(y_out-mu))/n;
+y=n*log(sig)+logdetR;
 end
-
 
 function y=lik_bmgp_inf(theta)
 global design_x y_out
@@ -86,8 +90,8 @@ alpha =theta(d+2);
 lambda=D.^2./(D.^2+exp(alpha)./D.^2);
 %lamnda_1=1-lambda;
 mu=(lambda'*(Q\lambda))\(lambda'*(Q\(y_out)));
-sig=(y_out-mu*lambda)'*(Q\(y_out-mu*lambda))/n;
 [invQ,logdetQ]=invandlogdet(Q);
+sig=(y_out-mu*lambda)'*(invQ*(y_out-mu*lambda))/n;
 y=n*log(sig)+logdetQ;
 end
 
@@ -102,6 +106,7 @@ for i=1:d
 end
 y=R;
 end
+
 function y=corr_inf(theta)%specified
 global design_x
 d=size(design_x,2);
@@ -115,13 +120,11 @@ function [y,sig]=predict_gp(design,x_p,y_out,theta)%column
 d=size(design,2);
 n=size(design,1);
 R=corr_m(theta);
-
 mu=sum(R\(y_out))/(sum(sum(inv(R))));
 r=ones(n,1);
 for i=1:d
    r=r.*exp(-abs(design(:,i)- x_p(i))/exp(theta(i))).*(1+abs(design(:,i)- x_p(i))/exp(theta(i)));
 end
-
 sig=max(0,(1-r'*(R\r))*(y_out-mu)'*(R\(y_out-mu))/n);
 y=mu+r'*(R\(y_out-mu));
 end
