@@ -1,7 +1,7 @@
 clear;clc;warning off; format long
 x=[0.1,0.13,0.16,0.2,0.3,0.5]';
-x=[0.4,0.5,0.6,0.7,0.8,0.9]';
-x=[0.1,0.125,0.15,0.175,0.2]';
+%x=[0.4,0.5,0.6,0.7,0.8,0.9]';
+%x=[0.1,0.125,0.15,0.175,0.2]';
 E = 1.0e6; % modulus of elasticity
 nu = .3; % Poisson's ratio
 len = 10.0; % side length for the square plate
@@ -18,21 +18,22 @@ sig(i,:)=res(2,:);
 y_t(i)=-0.0138*pres*len^4./(E*(x_test(i)).^3);
 end
 %%
-p1=plot(x_test,y_p(:,1),'b','LineWidth',2); hold on
+p2=plot(x_test,y_p(:,2),'r','LineWidth',2); hold on
+p6=plot(x_test,y_p(:,2)+(norminv(0.99)*sig(:,2)).^(1/2),'r','LineWidth',2);
+plot(x_test,y_p(:,2)-(norminv(0.99)*sig(:,2)).^(1/2),'r','LineWidth',2);
+p1=plot(x_test,y_p(:,1),'b--','LineWidth',2); hold on
 p5=plot(x_test,y_p(:,1)+(norminv(0.99)*sig(:,1)).^(1/2),'b--','LineWidth',2);
 plot(x_test,y_p(:,1)-(norminv(0.99)*sig(:,1)).^(1/2),'b--','LineWidth',2)
-p2=plot(x_test,y_p(:,2),'r','LineWidth',2);
-p6=plot(x_test,y_p(:,2)+(norminv(0.99)*sig(:,2)).^(1/2),'r--','LineWidth',2);
-plot(x_test,y_p(:,2)-(norminv(0.99)*sig(:,2)).^(1/2),'r--','LineWidth',2);
 p3=plot(x,wMax,'ko','MarkerSize',12);
 p4=plot(x_test,y_t,'kx','MarkerSize',12);
-label={'Posterior mean of standard GP emulator','Posterior mean of BMGP emulator','Data','True function','LCL/UCL for standard GP emulator ','LCL/UCL for BMGP emulator '};
-legend([p1,p2,p3,p4,p5,p6],label,'FontSize',13,'Fontname', 'Times New Roman');hold on
+label={'Posterior mean / LCL / UCL of standard GP emulator','Posterior mean / LCL / UCL of BMGP emulator','Data','True function'};
+legend([p1,p2,p3,p4],label,'FontSize',13,'Fontname', 'Times New Roman');hold on
 ylabel('Maximum Deflection ','FontSize',13,'Fontname', 'Times New Roman')
 xlabel('Thickness','FontSize',13,'Fontname', 'Times New Roman')
 %xticklabels('FontSize',13)
 a=2.2;
 set(gca,'FontSize',13);
+set(gcf,'Position',[200,200,1000,400]);
 %print(gcf,'-dtiff','-r300','result_boundary_inf');
 %ylim([-0.5,0.28])
 function [theta_gp,theta_bmgp]=GP_fit(design,y)% all column

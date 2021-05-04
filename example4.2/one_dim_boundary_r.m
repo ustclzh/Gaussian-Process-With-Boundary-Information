@@ -27,20 +27,21 @@ y_p(i,:)=res(1,:);
 sig(i,:)=res(2,:);
 y_t(i)=wMax_true(x_test(i));
 end
-p1=plot(x_test,y_p(:,1),'b','LineWidth',2); hold on
+p1=plot(x_test,y_p(:,1),'b--','LineWidth',2); hold on
 p5=plot(x_test,y_p(:,1)+(norminv(0.99)*sig(:,1)).^(1/2),'b--','LineWidth',2);
 plot(x_test,y_p(:,1)-(norminv(0.99)*sig(:,1)).^(1/2),'b--','LineWidth',2)
 p2=plot(x_test,y_p(:,2),'r','LineWidth',2);
-p6=plot(x_test,y_p(:,2)+(norminv(0.99)*sig(:,2)).^(1/2),'r--','LineWidth',2);
-plot(x_test,y_p(:,2)-(norminv(0.99)*sig(:,2)).^(1/2),'r--','LineWidth',2);
+p6=plot(x_test,y_p(:,2)+(norminv(0.99)*sig(:,2)).^(1/2),'r','LineWidth',2);
+plot(x_test,y_p(:,2)-(norminv(0.99)*sig(:,2)).^(1/2),'r','LineWidth',2);
 p3=plot(x,wMax,'ko','MarkerSize',12);
 p4=plot(x_test,y_t,'kx','MarkerSize',12);
-label={'Posterior mean of standard GP emulator','Posterior mean of BMGP emulator','Data','True function','LCL/UCL for standard GP emulator ','LCL/UCL for BMGP emulator '};
-legend([p1,p2,p3,p4,p5,p6],label,'FontSize',13,'Fontname', 'Times New Roman');hold on
+label={'Posterior mean / LCL / UCL of standard GP emulator','Posterior mean / LCL / UCL of BMGP emulator','Data','True function'};
+legend([p1,p2,p3,p4],label,'FontSize',13,'Fontname', 'Times New Roman');hold on
 ylabel('Maximum Deflection','FontSize',13,'Fontname', 'Times New Roman')
 xlabel('Thickness','FontSize',13,'Fontname', 'Times New Roman')
 set(gca,'FontSize',13);
 print(gcf,'-dtiff','-r300','result_boundary_r');
+set(gcf,'Position',[200,200,1000,400]);
 ylim([-0.6,0.38])
 %%
 function theta_gp=GP_fit(design,y,wMax_b)% all column
