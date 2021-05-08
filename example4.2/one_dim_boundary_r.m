@@ -133,23 +133,27 @@ end
 
 function theta_bmgp=BMGP_fit(design,y,wMax_b)% all column
 %%
-global design_x y_out y_left y_right wMax_r
+global design_x y_out y_left y_right wMax_r alpha_opt
 wMax_r=wMax_b;
 y_left=y(1);
 y_right=y(end);
 design_x=design;
 y_out=y;
-b=sobolset(3);
-b=(net(b,30)-0.5);
-problem = createOptimProblem('fminunc','x0',zeros(1,3),'objective',@lik_bmgp);
+a=(-5:5)';
+problem = createOptimProblem('fminunc','x0',[0],'objective',@ls_bmgp);
+tpoints=CustomStartPointSet(a);
+ms=MultiStart('StartPointsToRun','all','Display','off');
+[alpha_opt,fval1,exitflag1,solution1]=run(ms,problem,tpoints);
+b=sobolset(2);
+b=(net(b,20)-0.5);
+problem = createOptimProblem('fminunc','x0',zeros(1,2),'objective',@lik_bmgp);
 tpoints=CustomStartPointSet(b);
 ms=MultiStart('StartPointsToRun','all','Display','off');
 [theta_bmgp,fval1,exitflag1,solution1]=run(ms,problem,tpoints);
 end
 
 function y=lik_bmgp(theta)
-global design_x y_out wMax_r
-d=size(design_x,2);
+global design_x y_out wMax_r alpha_opt
 n=size(y_out,2);
 if (exp(theta(1))<0.1)||(exp(theta(1))>50)
     y=inf;
@@ -157,13 +161,22 @@ if (exp(theta(1))<0.1)||(exp(theta(1))>50)
 end
 Q=corr_inf(theta);
 D=abs(1./abs(1+2*design_x)-1/3);
-alpha =theta(d+2);
+alpha =alpha_opt;
 lambda=D.^2./(D.^2+exp(alpha)./D.^2);
 lambda1=1-lambda;
 mu=(lambda'*(Q\lambda))\(lambda'*(Q\(y_out-lambda1*wMax_r)));
 sig=(y_out-mu*lambda-lambda1*wMax_r)'*(Q\(y_out-mu*lambda-lambda1*wMax_r));
 [invQ,logdetQ]=invandlogdet(Q);
 y=n*log(sig)+logdetQ;
+end
+
+function y=ls_bmgp(alpha)
+global design_x y_out wMax_r
+D=abs(1./abs(1+2*design_x)-1/3);
+lambda=D.^2./(D.^2+exp(alpha)./D.^2);
+lambda1=1-lambda;
+mu=(lambda'*(lambda))\(lambda'*((y_out-lambda1*wMax_r)));
+y=sum((y_out-mu*lambda-lambda1*wMax_r).^2);
 end
 
 function y=corr_inf(theta)%specified
@@ -223,7 +236,7 @@ y=mu+r'*(R\(y_out-mu));
 end
 
 function [y,sig]=predict_bmgp(design,x_p,y,theta,wMax_b)%column
-global design_x y_out type_corr
+global design_x y_out type_corr alpha_opt
 type_corr=3;
 design_x=design;
 y_out=y;
@@ -236,10 +249,10 @@ for i=1:n
    r(i)=corr_custom(design(i,:),x_p,theta(1:d),3);
 end
 D=abs(1./abs(1+2*design)-1/3);
-alpha =theta(d+2);
+alpha =alpha_opt;
 lambda=D.^2./(D.^2+exp(alpha)./D.^2);
 lambda1=1-lambda;
-mu=(lambda'*(Q\lambda))\(lambda'*(Q\(y_out-lambda1*wMax_b)));
+mu=(lambda'*(lambda))\(lambda'*((y_out-lambda1*wMax_b)));
 d=abs(1./abs(1+2*x_p)-1/3);
 q=r.*(d*D).^exp(eta);
 sig=(d^(2*exp(eta))-q'*(Q\q))*(y_out-mu*lambda-lambda1*wMax_b)'*(Q\(y_out-mu*lambda-lambda1*wMax_b))/n;
